@@ -3,6 +3,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from beanie import PydanticObjectId
 
 from app.auth import decode_access_token
+from app.database import ensure_db
 from app.models import User
 
 security = HTTPBearer(auto_error=False)
@@ -11,6 +12,7 @@ security = HTTPBearer(auto_error=False)
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(security),
 ) -> User:
+    await ensure_db()
     if not credentials:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

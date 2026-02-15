@@ -1,30 +1,19 @@
-from contextlib import asynccontextmanager
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pymongo.errors import ServerSelectionTimeoutError
 
 from app.config import settings
-from app.database import init_db
 from app.routers import auth, summary, transactions
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    try:
-        await init_db()
-    except ServerSelectionTimeoutError as e:
-        raise RuntimeError(
-            "Could not connect to MongoDB. Set MONGODB_URL in .env to a valid connection string."
-        ) from e
-    yield
-
 
 app = FastAPI(
     title="Expense Tracker API",
     description="Personal Income & Expense Tracker",
-    lifespan=lifespan,
 )
+
+
+@app.get("/", tags=["health"])
+def root():
+    """Health check; no DB required. If this returns 200, env vars are loaded."""
+    return {"status": "ok"}
 
 app.add_middleware(
     CORSMiddleware,

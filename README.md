@@ -98,14 +98,15 @@ backend/
 
 ## Deploy on Vercel
 
-1. **Root**: If the repo is a monorepo, set **Root Directory** to `backend` (or deploy only the `backend` folder).
-2. **Entry**: Vercel looks for FastAPI `app` at `app/index.py`; this repo provides `app/index.py` which imports `app` from `app.main`.
-3. **Environment variables** (required — no defaults in production): In Vercel → Project → Settings → Environment Variables, set:
-   - `MONGODB_URL` — MongoDB connection string (e.g. Atlas; ensure your Atlas project allows access from anywhere or add Vercel IPs if required).
-   - `DATABASE_NAME` — Database name.
-   - `JWT_SECRET` — Strong random secret for production.
-   - `JWT_EXPIRE_MINUTES` — e.g. `10080` (7 days).
-   - `CORS_ORIGINS` — Comma-separated frontend URLs, e.g. `https://your-frontend.vercel.app,https://your-frontend.vercel.app`.
-4. **Logs**: If the serverless function crashes (500 / FUNCTION_INVOCATION_FAILED), open the deployment → **Logs** to see the error (often missing env vars or MongoDB connection failure).
+1. **Root**: If the repo is a monorepo, set **Root Directory** to `backend` so Vercel’s root is this folder (where `app/` and `requirements.txt` live).
+2. **Entry**: Vercel looks for FastAPI `app` at `app/index.py`; this repo has `app/index.py` importing `app` from `app.main`.
+3. **Environment variables** (all required in Vercel; no defaults in code): In **Project → Settings → Environment Variables** add:
+   - `MONGODB_URL` — MongoDB connection string (e.g. Atlas). In Atlas → Network Access, allow **0.0.0.0/0** (or add Vercel’s IPs) so serverless can connect.
+   - `DATABASE_NAME` — e.g. `expense_tracker`
+   - `JWT_SECRET` — Strong random string for production
+   - `JWT_EXPIRE_MINUTES` — e.g. `10080` (7 days)
+   - `CORS_ORIGINS` — Comma-separated frontend URLs, e.g. `https://your-app.vercel.app`
+4. **Health check**: After deploy, open `https://your-backend-url.vercel.app/`. If you see `{"status":"ok"}`, env vars are loaded and the app started. If you still get 500, open the deployment **Logs** for the real error (often MongoDB connection timeout or missing env var).
+5. **Logs**: Deployment → **Logs** shows the traceback (e.g. “Missing required env vars” or MongoDB connection errors).
 
 For full project details and frontend setup, see the [root README](../README.md).
